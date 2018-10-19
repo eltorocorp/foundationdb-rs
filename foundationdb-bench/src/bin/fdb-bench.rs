@@ -5,7 +5,6 @@ extern crate stopwatch;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
-#[macro_use]
 extern crate structopt;
 
 use std::sync::atomic::*;
@@ -154,7 +153,8 @@ impl Bench {
         r: std::ops::Range<usize>,
         counter: Counter,
     ) -> Box<Future<Item = (), Error = Error>> {
-        let runners = r.into_iter()
+        let runners = r
+            .into_iter()
             .map(|n| {
                 // With deterministic Rng, benchmark with same parameters will overwrite same set
                 // of keys again, which makes benchmark result stable.

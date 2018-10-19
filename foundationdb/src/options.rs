@@ -302,9 +302,6 @@ pub enum TransactionOption {
     CausalReadDisable,
     /// The next write performed on this transaction will not generate a write conflict range. As a result, other transactions which read the key(s) being modified by the next write will not conflict with this transaction. Care needs to be taken when using this option on a transaction that is shared between multiple threads. When setting this option, write conflict ranges will be disabled on the next write operation, regardless of what thread it is on.
     NextWriteNoWriteConflictRange,
-    /// Committing this transaction will bypass the normal load balancing across proxies and go directly to the specifically nominated 'first proxy'.
-    CommitOnFirstProxy,
-    CheckWritesEnable,
     /// Reads performed by a transaction will not see any prior mutations that occured in that transaction, instead seeing the value which was in the database at the transaction's read version. This option may provide a small performance benefit for the client, but also disables a number of client-side optimizations which are beneficial for transactions which tend to read and write the same keys within a single transaction.
     ReadYourWritesDisable,
     /// Disables read-ahead caching for range reads. Under normal operation, a transaction will read extra rows from the database into cache if range reads are used to page through a series of data one row at a time (i.e. if a range read with a one row limit is followed by another one row range read starting immediately after the result of the first).
@@ -322,7 +319,6 @@ pub enum TransactionOption {
     AccessSystemKey,
     /// Allows this transaction to read system keys (those that start with the byte 0xFF)
     ReadSystemKey,
-    DebugDump,
     /// Optional transaction name
     ///
     DebugRetryLogging(String),
@@ -369,12 +365,6 @@ impl TransactionOption {
             TransactionOption::NextWriteNoWriteConflictRange => {
                 fdb::FDBTransactionOption_FDB_TR_OPTION_NEXT_WRITE_NO_WRITE_CONFLICT_RANGE
             }
-            TransactionOption::CommitOnFirstProxy => {
-                fdb::FDBTransactionOption_FDB_TR_OPTION_COMMIT_ON_FIRST_PROXY
-            }
-            TransactionOption::CheckWritesEnable => {
-                fdb::FDBTransactionOption_FDB_TR_OPTION_CHECK_WRITES_ENABLE
-            }
             TransactionOption::ReadYourWritesDisable => {
                 fdb::FDBTransactionOption_FDB_TR_OPTION_READ_YOUR_WRITES_DISABLE
             }
@@ -405,7 +395,6 @@ impl TransactionOption {
             TransactionOption::ReadSystemKey => {
                 fdb::FDBTransactionOption_FDB_TR_OPTION_READ_SYSTEM_KEYS
             }
-            TransactionOption::DebugDump => fdb::FDBTransactionOption_FDB_TR_OPTION_DEBUG_DUMP,
             TransactionOption::DebugRetryLogging(ref _v) => {
                 fdb::FDBTransactionOption_FDB_TR_OPTION_DEBUG_RETRY_LOGGING
             }
@@ -452,12 +441,6 @@ impl TransactionOption {
             TransactionOption::NextWriteNoWriteConflictRange => {
                 fdb::fdb_transaction_set_option(target, code, std::ptr::null(), 0)
             }
-            TransactionOption::CommitOnFirstProxy => {
-                fdb::fdb_transaction_set_option(target, code, std::ptr::null(), 0)
-            }
-            TransactionOption::CheckWritesEnable => {
-                fdb::fdb_transaction_set_option(target, code, std::ptr::null(), 0)
-            }
             TransactionOption::ReadYourWritesDisable => {
                 fdb::fdb_transaction_set_option(target, code, std::ptr::null(), 0)
             }
@@ -486,9 +469,6 @@ impl TransactionOption {
                 fdb::fdb_transaction_set_option(target, code, std::ptr::null(), 0)
             }
             TransactionOption::ReadSystemKey => {
-                fdb::fdb_transaction_set_option(target, code, std::ptr::null(), 0)
-            }
-            TransactionOption::DebugDump => {
                 fdb::fdb_transaction_set_option(target, code, std::ptr::null(), 0)
             }
             TransactionOption::DebugRetryLogging(ref v) => fdb::fdb_transaction_set_option(
