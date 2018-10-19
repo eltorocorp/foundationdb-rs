@@ -8,7 +8,7 @@ High level client bindings for FoundationDB.
 """
 
 documentation = "https://docs.rs/foundationdb"
-repository = "https://github.com/bluejekyll/foundationdb-rs"
+repository = "https://github.com/eltorocorp/foundationdb-rs"
 license = "MIT/Apache-2.0"
 
 readme = "README.md"
@@ -16,8 +16,8 @@ keywords = ["foundationdb", "kv"]
 categories = ["database"]
 
 [badges]
-travis-ci = { repository = "bluejekyll/foundationdb-rs" }
-# codecov = { repository = "bluejekyll/foundationdb-rs", branch = "master", service = "github" }
+travis-ci = { repository = "eltorocorp/foundationdb-rs" }
+# codecov = { repository = "eltorocorp/foundationdb-rs", branch = "master", service = "github" }
 
 [features]
 default = ["fdb-6_0", "uuid"]
