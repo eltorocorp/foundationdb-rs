@@ -31,12 +31,12 @@ static HAS_BEEN_RUN: AtomicBool = AtomicBool::new(false);
 /// These functions are used to configure, start and stop the FoundationDB event loop on this thread.
 ///
 /// *NOTE* Networks may only be constructed from an initalized `fdb_api::FdbApi`
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Network(private::PrivateNetwork);
 
 // forces the construction to be private to this module
 mod private {
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Debug)]
     pub(super) struct PrivateNetwork;
 }
 
