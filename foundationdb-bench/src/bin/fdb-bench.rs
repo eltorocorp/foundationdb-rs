@@ -11,6 +11,7 @@ use std::sync::atomic::*;
 use std::sync::Arc;
 
 use futures::future::*;
+use rand::RngCore;
 use rand::SeedableRng;
 use stopwatch::Stopwatch;
 use structopt::StructOpt;
@@ -78,8 +79,6 @@ impl BenchRunner {
 
     //TODO: impl future
     fn step(mut self) -> Box<Future<Item = Loop<(), Self>, Error = Error>> {
-        use rand::Rng;
-
         let trx = self.trx.take().unwrap();
 
         for _ in 0..self.trx_batch_size {
@@ -158,9 +157,8 @@ impl Bench {
             .map(|n| {
                 // With deterministic Rng, benchmark with same parameters will overwrite same set
                 // of keys again, which makes benchmark result stable.
-                let seed = [n as u32, 0, 0, 1];
-                let mut rng = rand::XorShiftRng::new_unseeded();
-                rng.reseed(seed);
+                let seed = [n as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+                let rng = rand::XorShiftRng::from_seed(seed);
                 BenchRunner::new(self.db.clone(), rng, counter.clone(), &self.opt).run()
             })
             .collect::<Vec<_>>();
