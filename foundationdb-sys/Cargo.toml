@@ -25,4 +25,4 @@ travis-ci = { repository = "eltorocorp/foundationdb-rs" }
 
 
 [build-dependencies]
-bindgen = "*"
+bindgen = "0.36.1"
