@@ -7,7 +7,7 @@ description = """
 Bindings to the C api for FoundationDB
 """
 
-repository = "https://github.com/bluejekyll/foundationdb-rs"
+repository = "https://github.com/eltorocorp/foundationdb-rs"
 
 readme = "README.md"
 keywords = ["foundationdb", "kv"]
@@ -16,16 +16,16 @@ categories = ["database"]
 license = "MIT/Apache-2.0"
 
 [badges]
-travis-ci = { repository = "bluejekyll/foundationdb-rs" }
+travis-ci = { repository = "eltorocorp/foundationdb-rs" }
 
 
 [dependencies]
-rand = "0.5"
-futures = "*"
+rand = "0.7"
+futures = "0.1"
 foundationdb = { version = "*", path = "../foundationdb" }
-stopwatch = "*"
-log = "*"
-env_logger = "*"
-structopt = "*"
+stopwatch = "0"
+log = "0.4"
+env_logger = "0.6"
+structopt = "0.2"
 
 [build-dependencies]

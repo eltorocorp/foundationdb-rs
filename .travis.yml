@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: xenial
 language: rust
 
 matrix:
@@ -17,6 +17,11 @@ matrix:
     - os: osx
       rust: stable
       env: NAME=macos
+           RUST_BACKTRACE=full
+
+    - os: windows
+      rust: stable
+      env: NAME=windows
            RUST_BACKTRACE=full
 
     - rust: nightly
@@ -50,13 +55,15 @@ matrix:
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then scripts/install_foundationdb_linux.sh ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then scripts/install_foundationdb_macos.sh ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then scripts/install_foundationdb_win64.sh ; export PATH="${PATH}:/c/Program Files/foundationdb/bin" ; fi
   - if [[ "$CLIPPY" == "true" ]]; then cargo install clippy --force ; fi
 
 script:
-  - cargo test -p foundationdb-sys --all-features
-  - cargo test -p foundationdb-gen --all-features
-  - cargo test -p foundationdb --all-features
-  - cargo test -p foundationdb-bench --all-features
-  - cargo run -p foundationdb --example class-scheduling --all-features 
+  - cargo test --manifest-path foundationdb-sys/Cargo.toml
+  - cargo test --manifest-path foundationdb-gen/Cargo.toml
+  - cargo test --manifest-path foundationdb/Cargo.toml
+  - cargo test --manifest-path foundationdb/Cargo.toml --no-default-features --features fdb-6_0
+  - cargo test --manifest-path foundationdb-bench/Cargo.toml
+  - cargo run --manifest-path foundationdb/Cargo.toml --example class-scheduling
 
 # after_success: cargo kcov here...

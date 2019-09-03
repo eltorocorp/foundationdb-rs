@@ -9,7 +9,8 @@ case $(uname) in
     brew install mono
   ;;
   Linux)
-    sudo apt install mono-devel
+    sudo apt update
+    sudo apt install mono-devel -y
   ;;
   *) echo "only macOS or Ubuntu is supported"
 esac
@@ -27,11 +28,9 @@ esac
   cd ${fdb_builddir:?}
 
   ## Get foundationdb source
-  git clone --depth 1 https://github.com/apple/foundationdb.git -b release-5.1
+  git clone --depth 1 https://github.com/apple/foundationdb.git -b release-6.0
   cd foundationdb
-
-  ## currently we only support 5.1
-  git checkout release-5.1
+  git checkout release-6.0
 
   ## need the python api bindings
   make fdb_python
