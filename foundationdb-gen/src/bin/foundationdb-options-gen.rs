@@ -5,7 +5,7 @@ extern crate failure;
 
 type Result<T> = std::result::Result<T, failure::Error>;
 
-use inflector::cases::classcase;
+use inflector::cases::pascalcase;
 use inflector::cases::screamingsnakecase;
 use xml::attribute::OwnedAttribute;
 use xml::reader::{EventReader, XmlEvent};
@@ -68,10 +68,7 @@ impl FdbScope {
                 }
             }
 
-            let mut enum_name = screamingsnakecase::to_screaming_snake_case(&option.name);
-            if self.name != "MutationType" {
-                enum_name = Self::fix_enum_name(&enum_name);
-            }
+            let enum_name = screamingsnakecase::to_screaming_snake_case(&option.name);
 
             s += &format!(" => fdb::{}{},\n", enum_prefix, enum_name);
         }
@@ -79,23 +76,6 @@ impl FdbScope {
         s += "}\n}\n";
 
         s
-    }
-
-    fn fix_enum_name(name: &str) -> String {
-        let tab = [
-            ("BYTE", "BYTES"),
-            ("WATCH", "WATCHES"),
-            ("PEER", "PEERS"),
-            ("THREAD", "THREADS"),
-            ("KEY", "KEYS"),
-        ];
-
-        for &(ref from, ref to) in tab.iter() {
-            if name.ends_with(from) {
-                return format!("{}{}", &name[0..(name.len() - from.len())], to);
-            }
-        }
-        name.to_owned()
     }
 
     fn gen_apply(&self) -> String {
@@ -272,7 +252,7 @@ impl From<Vec<OwnedAttribute>> for FdbOption {
             let v = attr.value;
             match attr.name.local_name.as_str() {
                 "name" => {
-                    opt.name = classcase::to_class_case(&v);
+                    opt.name = pascalcase::to_pascal_case(&v);
                 }
                 "code" => {
                     opt.code = v.parse().unwrap();
