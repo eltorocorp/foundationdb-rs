@@ -13,6 +13,9 @@ mod element;
 use std::ops::{Deref, DerefMut};
 use std::{self, io::Write, string::FromUtf8Error};
 
+#[cfg(feature = "uuid")]
+use uuid;
+
 pub use self::element::Element;
 use self::element::Type;
 
@@ -34,6 +37,10 @@ pub enum Error {
     /// Utf8 Conversion error of tuple data
     #[fail(display = "UTF8 conversion error")]
     FromUtf8Error(FromUtf8Error),
+    /// Uuid Conversion error of tuple data
+    #[cfg(feature = "uuid")]
+    #[fail(display = "UUID conversion error")]
+    FromUuidError(uuid::BytesError),
 }
 
 /// Tracks the depth of a Tuple decoding chain
@@ -259,6 +266,13 @@ impl From<FromUtf8Error> for Error {
     }
 }
 
+#[cfg(feature = "uuid")]
+impl From<uuid::BytesError> for Error {
+    fn from(error: uuid::BytesError) -> Self {
+        Error::FromUuidError(error)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -337,7 +351,8 @@ mod tests {
     fn test_decode_recursive_tuple() {
         let two_decode = <(String, (String, i64))>::try_from(&[
             2, 111, 110, 101, 0, 5, 2, 116, 119, 111, 0, 21, 42, 0,
-        ]).expect("failed two");
+        ])
+        .expect("failed two");
 
         // TODO: can we get eq for borrows of the inner types?
         assert_eq!(("one".to_string(), ("two".to_string(), 42)), two_decode);
@@ -345,7 +360,8 @@ mod tests {
         let three_decode = <(String, (String, i64, (String, i64)))>::try_from(&[
             2, 111, 110, 101, 0, 5, 2, 116, 119, 111, 0, 21, 42, 5, 2, 116, 104, 114, 101, 101, 0,
             21, 33, 0, 0,
-        ]).expect("failed three");
+        ])
+        .expect("failed three");
 
         assert_eq!(
             &(
@@ -358,9 +374,9 @@ mod tests {
         //
         // from Python impl:
         //  >>> [ord(x) for x in fdb.tuple.pack( (None, (None, None)) )]
-        let option_decode = <(Option<i64>, (Option<i64>, Option<i64>))>::try_from(&[
-            0, 5, 0, 255, 0, 255, 0,
-        ]).expect("failed option");
+        let option_decode =
+            <(Option<i64>, (Option<i64>, Option<i64>))>::try_from(&[0, 5, 0, 255, 0, 255, 0])
+                .expect("failed option");
 
         assert_eq!(&(None::<i64>, (None::<i64>, None::<i64>)), &option_decode)
     }
