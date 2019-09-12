@@ -11,8 +11,8 @@ use std::sync::atomic::*;
 use std::sync::Arc;
 
 use futures::future::*;
-use rand::RngCore;
-use rand::SeedableRng;
+use rand::prelude::*;
+use rand::rngs::mock::StepRng;
 use stopwatch::Stopwatch;
 use structopt::StructOpt;
 
@@ -44,14 +44,13 @@ struct BenchRunner {
     counter: Counter,
     key_buf: Vec<u8>,
     val_buf: Vec<u8>,
-
-    rng: rand::XorShiftRng,
+    rng: StepRng,
     trx: Option<Transaction>,
     trx_batch_size: usize,
 }
 
 impl BenchRunner {
-    fn new(db: Database, rng: rand::XorShiftRng, counter: Counter, opt: &Opt) -> Self {
+    fn new(db: Database, rng: StepRng, counter: Counter, opt: &Opt) -> Self {
         let mut key_buf = Vec::with_capacity(opt.key_len);
         key_buf.resize(opt.key_len, 0u8);
 
@@ -157,8 +156,7 @@ impl Bench {
             .map(|n| {
                 // With deterministic Rng, benchmark with same parameters will overwrite same set
                 // of keys again, which makes benchmark result stable.
-                let seed = [n as u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
-                let rng = rand::XorShiftRng::from_seed(seed);
+                let rng = StepRng::new(n as u64, 1);
                 BenchRunner::new(self.db.clone(), rng, counter.clone(), &self.opt).run()
             })
             .collect::<Vec<_>>();
