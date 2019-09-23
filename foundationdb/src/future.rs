@@ -26,7 +26,7 @@ use error::{self, Error, Result};
 /// An opaque type that represents a Future in the FoundationDB C API.
 pub(crate) struct FdbFuture {
     f: Option<*mut fdb::FDBFuture>,
-    task: Option<Box<futures::task::Task>>,
+    cb_active: bool,
 }
 
 impl FdbFuture {
@@ -34,7 +34,7 @@ impl FdbFuture {
     pub(crate) unsafe fn new(f: *mut fdb::FDBFuture) -> Self {
         Self {
             f: Some(f),
-            task: None,
+            cb_active: false,
         }
     }
 }
@@ -56,14 +56,14 @@ impl futures::Future for FdbFuture {
     fn poll(&mut self) -> std::result::Result<Async<Self::Item>, Self::Error> {
         let f = self.f.expect("cannot poll after resolve");
 
-        if self.task.is_none() {
-            let task = futures::task::current();
-            let task = Box::new(task);
-            let task_ptr = task.as_ref() as *const _;
+        if !self.cb_active {
+            let task = Box::new(futures::task::current());
+            let task = Box::into_raw(task);
+            let task_ptr = task as *mut std::ffi::c_void;
+            self.cb_active = true;
             unsafe {
-                fdb::fdb_future_set_callback(f, Some(fdb_future_callback), task_ptr as *mut _);
+                fdb::fdb_future_set_callback(f, Some(fdb_future_callback), task_ptr);
             }
-            self.task = Some(task);
 
             return Ok(Async::NotReady);
         }
