@@ -568,7 +568,7 @@ impl Decode for Element {
                 Ok((Element::F64(v), offset))
             }
             FALSE => Ok((Element::Bool(false), 1)),
-            TRUE => Ok((Element::Bool(false), 1)),
+            TRUE => Ok((Element::Bool(true), 1)),
             #[cfg(feature = "uuid")]
             UUID => {
                 let (v, offset) = Decode::decode(buf, tuple_depth)?;
@@ -729,5 +729,11 @@ mod tests {
             // one of the inner Nones, is missing the final escape byte...
             <(i64, (Option<i64>, Option<i64>))>::try_from(&[21, 42, 5, 0, 255, 0, 0]).is_err()
         );
+    }
+
+    #[test]
+    fn test_bool() {
+        test_round_trip(true, &[TRUE]);
+        test_round_trip(false, &[FALSE]);
     }
 }
