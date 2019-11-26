@@ -78,6 +78,25 @@ impl FdbScope {
         s
     }
 
+    fn fix_enum_name(name: &str) -> String {
+        let tab = [
+            ("BYTE", "BYTES"),
+            ("WATCH", "WATCHES"),
+            ("PEER", "PEERS"),
+            ("THREAD", "THREADS"),
+            ("KEY", "KEYS"),
+            ("FIT", "FITS"),
+            ("PROXY", "PROXIES"),
+        ];
+
+        for &(ref from, ref to) in tab.iter() {
+            if name.ends_with(from) {
+                return format!("{}{}", &name[0..(name.len() - from.len())], to);
+            }
+        }
+        name.to_owned()
+    }
+
     fn gen_apply(&self) -> String {
         let fn_name = match self.apply_fn_name() {
             Some(name) => name,
@@ -277,6 +296,9 @@ impl From<Vec<OwnedAttribute>> for FdbOption {
                     "false" => opt.hidden = false,
                     _ => panic!("unexpected boolean value: {}", v),
                 },
+                "defaultFor" | "persistent" => {
+                    // API 620+
+                }
                 attr => {
                     panic!("unexpected option attribute: {}", attr);
                 }
